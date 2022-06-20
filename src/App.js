@@ -72,9 +72,10 @@ export default function App() {
         }) || 0
     }*/
 
-    function deleteNote() {
+    function deleteNote(event, id) {
+        event.stopPropagation()
         setNotes(
-            oldNotes => notes.filter((item)=>item.id===currentNoteId ? false : true)
+            oldNotes => oldNotes.filter((item)=>item.id!==id)
         )
     }
 
