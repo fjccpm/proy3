@@ -6,10 +6,21 @@ import Split from "react-split"
 import {nanoid} from "nanoid"
 
 export default function App() {
-    const [notes, setNotes] = React.useState([])
+    const [notes, setNotes] = React.useState(//[]
+        //returning a function defines it will run only once during initilization.
+        () => (JSON.parse(localStorage.getItem("notes")) || [])
+        )
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
+
+    /*const [state, setState] = React.useState(
+        () => console.log("Initialization. When returning a function only runs once during initilization!!!")
+    )*/
+
+    React.useEffect(()=>{
+        localStorage.setItem("notes", JSON.stringify(notes))
+    }, [notes])
     
     function createNewNote() {
         const newNote = {
@@ -20,14 +31,53 @@ export default function App() {
         setCurrentNoteId(newNote.id)
     }
     
-    function updateNote(text) {
+    //updates notes without rearranging notes.
+    /*function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
+            console.log([{id: currentNoteId, body: text }, ...notes.filter((item)=>item.id===currentNoteId ? false : true)])
+            console.log([{id: currentNoteId, body: text }, ...notes])
             return oldNote.id === currentNoteId
                 ? { ...oldNote, body: text }
                 : oldNote
         }))
+    }*/
+
+    //update and rearrange notes order putting the updated one first. Teacher method.
+    /*function updateNote(text) {
+        // Try to rearrange the most recently-modified
+        // not to be at the top
+        setNotes(oldNotes => {
+            const newArray = []
+            for(let i = 0; i < oldNotes.length; i++) {
+                const oldNote = oldNotes[i]
+                if(oldNote.id === currentNoteId) {
+                    newArray.unshift({ ...oldNote, body: text })
+                } else {
+                    newArray.push(oldNote)
+                }
+            }
+            return newArray
+        })*/
+
+    //update and rearrange notes but my method.    
+    function updateNote(text) {
+        setNotes(oldNotes =>
+            [{id: currentNoteId, body: text }, ...oldNotes.filter((item)=>item.id===currentNoteId ? false : true)]
+        )
     }
     
+    /*function findCurrentNoteIndex() {
+        return notes.findIndex(note => {
+            return note.id === currentNoteId
+        }) || 0
+    }*/
+
+    function deleteNote() {
+        setNotes(
+            oldNotes => notes.filter((item)=>item.id===currentNoteId ? false : true)
+        )
+    }
+
     function findCurrentNote() {
         return notes.find(note => {
             return note.id === currentNoteId
@@ -49,6 +99,7 @@ export default function App() {
                     currentNote={findCurrentNote()}
                     setCurrentNoteId={setCurrentNoteId}
                     newNote={createNewNote}
+                    deleteNote={deleteNote}
                 />
                 {
                     currentNoteId && 
